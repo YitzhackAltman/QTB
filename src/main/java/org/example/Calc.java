@@ -1,14 +1,12 @@
 package org.example;
 
-public class Calc implements CalculatePresent{
+public abstract class Calc{
 
-    @Override
-    public double calculatePresentAnsweredPeople(int Amount_Answered_Users, int Amount_Total_Users) {
-        return 0;
+    public static double calculatePresentAnsweredUsers(int Amount_Answered_Users, int Amount_Total_Users) {
+        return ((double) Amount_Answered_Users / (double)Amount_Total_Users) * 100;
     }
 
-    @Override
-    public double calculatePresentEachQuestion(int count, int total_answers) {
+    public static double calculatePresentEachQuestion(int count, int total_answers) {
         return 0;
     }
 }

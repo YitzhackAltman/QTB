@@ -1,9 +1,6 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class MyUser {
@@ -17,8 +14,8 @@ public class MyUser {
     // private final ArrayList<String> lastButtonData = new ArrayList<>();
 
     // Map the questionIndex to List<Answers> indicate how each user
-    private final Map<String, List<Integer>> questionToAnswer = new HashMap<>();
-    private final List<Integer> answerIndexes = new ArrayList<>(3);
+    private final Map<String, String> questionToAnswer = new HashMap<>();
+    private final int[] integers = new int[3];
 
     public MyUser(Long chatId, String firstName) {
         this.firstName = firstName;
@@ -60,18 +57,17 @@ public class MyUser {
         return current_count_of_users;
     }
 
+    private int result(int index) { return integers.length == 0 ? 0 : integers[index]; }
+
     public void setQuestionToAnswer(String questionIndex, String answerIndex) {
         final int index = Integer.parseInt(answerIndex) - 1;
         // adding one
-        answerIndexes.add(index, answerIndexes.get(index) + 1);
-        this.questionToAnswer.put(questionIndex, answerIndexes);
-    }
-
-    int amount_of_answers_on_question_one() {
-        if(answered) {
-            //Stream<String> value = questionToAnswer.values().stream().map();
-        }
-        return 0;
+        System.out.println("--------------------------------");
+        System.out.println(integers[index]);
+        System.out.println("-------------------------------");
+        int result = result(index) + 1;
+        integers[index] = result;
+        this.questionToAnswer.put(questionIndex, answerIndex);
     }
 
     public int getMap() { return questionToAnswer.size(); }

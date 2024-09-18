@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SurveyAnswers {
-    private final List<String> questionId = new ArrayList<>(); //
+    //private final List<String> questionId = new ArrayList<>(); //
+    private final String[] questionId = new String[3];
+    private int current_question;
     private final List<String> answerId = new ArrayList<>(); // answerId.size()
     private MyUser user;
     private final Survey survey;
@@ -40,7 +42,7 @@ public class SurveyAnswers {
     // TODO: Always handling answers.get(answers.size() - 1)
     public void mapAnswerNumberForQuestion(String answerIndex) {
         if(user != null) {
-            String questionIndex = questionId.get(questionId.size() - 1);
+            String questionIndex = questionId[current_question - 1];
             user.setQuestionToAnswer(questionIndex, answerIndex);
         }
     }
@@ -48,7 +50,7 @@ public class SurveyAnswers {
     // TODO: check index not overflow the array
     // index - 1 because user is input from 1-3 index - 1
     int max_answers_for_spec_question() {
-        int index = Integer.parseInt(questionId.get(questionId.size() - 1));
+        int index = Integer.parseInt(questionId[current_question - 1]);
         return survey.getQuestions().get(index - 1).getOptions().size();
     }
 
@@ -57,19 +59,19 @@ public class SurveyAnswers {
 
 
 
-    public void setAnswerId(String answerId) {
-        this.answerId.add(answerId);
-    }
+    // public void setAnswerId(String answerId) {
+       // this.answerId.add(answerId);
+    //}
 
     // index - 1 => question are listed from 1-3
     public boolean isAlreadyAnswered(int index) {
         // Not answer yet
-        if(questionId.size() == 0) return false;
-        else return questionId.get(index - 1) != null;
+        if(current_question == 0) return false;
+        else return questionId[index - 1] != null;
     }
 
     public void setQuestionId(String questionId) {
-        this.questionId.add(questionId);
+        this.questionId[current_question++] = questionId;
     }
 
     public void setAnsweringUser(MyUser user) {

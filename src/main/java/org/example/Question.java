@@ -6,22 +6,13 @@ import java.util.List;
 
 public class Question {
     private String question;
-    // Answers do as buttons
     private List<String> options = new ArrayList<>();
     private int answerCount;
-
-    public Question() {
-
-    }
 
     public void setText(String text) {
         this.question= text;
     }
 
-//    public Question(String question, List<String> options) {
-//        this.question = question;
-//        this.options = options;
-//    }
 
 
     public List<String> getOptions() {

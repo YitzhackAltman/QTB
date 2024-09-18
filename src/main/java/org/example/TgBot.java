@@ -11,10 +11,16 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.*;
 
 
-// TODOS LIST:
-// TODO: Handle Users answers
-// TODO: IF Users answered or Passed 5 min close the [Survey]
-// TODO: CalculatePresent only one func but we can pass as a lambda
+// TODO LIST:
+// TODO UserQuestion as buttons
+// TODO More flexible
+// TODO Add ButtonData
+// TODO Remove code repeat
+// TODO: Buttons Yes or No user can input an keyboard handle it
+// TODO: Answer on others question repeat more than one time
+// TODO: Implement a Present for each question
+// TODO: Implement a normal timer time.isFiveMinutesOver() that count 5 min
+
 public class TgBot extends TelegramLongPollingBot {
    // private final List<InlineKeyboardButton> amount_questions_buttons = new ArrayList<>();
    // private final List<InlineKeyboardButton> amount_answers_buttons = new ArrayList<>();
@@ -83,14 +89,16 @@ public class TgBot extends TelegramLongPollingBot {
         if(currentSurvey.getCreatorName().equals(users_map.get(chatId).getFirstName())) {
 
             if(answers == null) {
+                time = new Time();
+
                 answers = new SurveyAnswers(currentSurvey);
                 answers.setHandleQuestionNumber(true);
                 // Start the survey with 5 minuts
-                time = new Time();
+
                 long startTime = System.currentTimeMillis();
 
                 Thread t = new Thread(() -> {
-                    while(!surveyIsCompleted) {
+                    while(!surveyIsCompleted || time.isFiveMinutesOver()) {
                         System.out.print("Time passed: ");
                         System.out.println(System.currentTimeMillis() - startTime);
                     }
@@ -105,6 +113,10 @@ public class TgBot extends TelegramLongPollingBot {
                 sendMessage(chatId, "Wait until time passed or others will answer on all questions");
             }
 
+            if(answers.isUserAnsweredOnAllQuestion()) {
+                users_map.get(chatId).setAnswered(true);
+            }
+
             int amountAnsweredUsers = amountOfAnsweredUsers();
             // TODO: End of Survey
 
@@ -114,15 +126,13 @@ public class TgBot extends TelegramLongPollingBot {
                 sendMessage(currentSurvey.getCreatorChatId(), "Sending the results of survey");
 
                 // TODO: Total answered users
-                double present = calculatePresent(amountAnsweredUsers, users_map.size());
-                sendMessage(currentSurvey.getCreatorChatId(), "The present is " + present);
+                double present = Calc.calculatePresentAnsweredUsers(amountAnsweredUsers, users_map.size());
+                sendMessage(currentSurvey.getCreatorChatId(), "Total users answered " + present + "%");
 
             }
 
             if(surveyIsCompleted) {
-                surveyIsCompleted = false;
-                SurveyTracker.setSurveyStart(false);
-                time.resetTimer();
+                clear();
             }
 
         }else {
@@ -130,8 +140,16 @@ public class TgBot extends TelegramLongPollingBot {
         }
     }
 
-    private double calculatePresent(int answeredUsers, int totalUsers) {
-        return ((double) answeredUsers / (double)totalUsers) * 100;
+    private void clear() {
+        surveyIsCompleted = false;
+        SurveyTracker.setSurveyStart(false);
+        answers = null;
+        time = null;
+        currentSurvey = null;
+        wantCreateSurvey = false;
+        surveyIsCompleted = false;
+        options.clear();
+        surveyTrackers.clear();
     }
 
 
@@ -146,7 +164,6 @@ public class TgBot extends TelegramLongPollingBot {
         return count;
     }
 
-    // TODO: implement
     private void handleInputFromUserForAnswers(Long chatId, SurveyAnswers answers, String messageText) {
         if(answers.isHandleQuestionNumber()) {
             getQuestionNumber(chatId, answers, messageText);
@@ -182,14 +199,16 @@ public class TgBot extends TelegramLongPollingBot {
             int answerCount = Integer.parseInt(messageText);
             if(answerCount >= 1 && answerCount <= tracker.max_answers_for_spec_question()) {
 
-                users_map.get(chatId).setAnswered(true);
+               // users_map.get(chatId).setAnswered(false);
+                // TODO: Inspect
                 tracker.mapAnswerNumberForQuestion(String.valueOf(answerCount));
 
-                tracker.setHandleQuestionNumber(false);
+                tracker.setHandleAnswerNumber(false);
 
-                tracker.setHandleAnswerNumber(true);
+                tracker.setHandleQuestionNumber(true);
+                sendMessage(chatId, "Answer on other questions");
             }else {
-                sendMessage(chatId, "Enter a valid number of answers! Choose(2-4)");
+                sendMessage(chatId, "Enter a valid number of answers! ");
             }
         }catch (NumberFormatException e) {
             sendMessage(chatId, "Please enter a valid number!");
@@ -259,7 +278,7 @@ public class TgBot extends TelegramLongPollingBot {
 
         if(tracker == null) {
             if (currentSurvey == null) {
-                // Rename this map.size >= 3
+                // TODO: Rename this map.size >= 3
                 if (true) {
                     surveyTrackers.put(chatId, new SurveyTracker(chatId, user));
 //                    createButtons(chatId, "How many questions would you like to ask? (Choose 1-3).",
@@ -453,10 +472,10 @@ public class TgBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "SAiNT";
+        return "tom";
     }
 
     public String getBotToken() {
-        return "6687164541:AAFpRl-iV_gRvFJn_3QS8ZPsg6De1tUXTeI";
+        return "6858446471:AAHtJemmvpN77g0iZie2dEs_lW-Dxk_R7TY";
     }
 }
