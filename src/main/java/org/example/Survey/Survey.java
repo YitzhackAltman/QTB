@@ -1,7 +1,15 @@
-package org.example;
+package org.example.Survey;
 
+import org.example.User.MyUser;
+import org.example.User.Question;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 
 public class Survey {
     private MyUser creator;
@@ -29,6 +37,26 @@ public class Survey {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+
+
+    public List<SendMessage> sendButtonMessage(Long chatId) {
+        List<SendMessage> sendMessages = new ArrayList<>();
+        for(Question question : questions) {
+            InlineKeyboardMarkup container = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> buttonsGrid = new ArrayList<>();
+            buttonsGrid.add(question.toButton());
+
+            SendMessage message1 = new SendMessage();
+            message1.setText("Question: " + question.getQuestion());
+            message1.setChatId(String.valueOf(chatId));
+            container.setKeyboard(buttonsGrid);
+            message1.setReplyMarkup(container);
+
+            sendMessages.add(message1);
+        }
+        return sendMessages;
     }
 
     @Override

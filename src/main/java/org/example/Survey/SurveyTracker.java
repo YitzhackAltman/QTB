@@ -1,4 +1,7 @@
-package org.example;
+package org.example.Survey;
+
+import org.example.User.MyUser;
+import org.example.User.Question;
 
 import java.util.ArrayList;
 import java.util.List;

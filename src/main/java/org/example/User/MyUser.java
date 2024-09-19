@@ -1,4 +1,4 @@
-package org.example;
+package org.example.User;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -62,9 +62,6 @@ public class MyUser {
     public void setQuestionToAnswer(String questionIndex, String answerIndex) {
         final int index = Integer.parseInt(answerIndex) - 1;
         // adding one
-        System.out.println("--------------------------------");
-        System.out.println(integers[index]);
-        System.out.println("-------------------------------");
         int result = result(index) + 1;
         integers[index] = result;
         this.questionToAnswer.put(questionIndex, answerIndex);

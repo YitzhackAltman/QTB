@@ -1,12 +1,13 @@
-package org.example;
+package org.example.Survey;
+
+import org.example.User.MyUser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SurveyAnswers {
     //private final List<String> questionId = new ArrayList<>(); //
-    private final String[] questionId = new String[3];
+    private final String[] questionId = new String[3]; // TODO: ADD TO MyUser
     private int current_question;
     private final List<String> answerId = new ArrayList<>(); // answerId.size()
     private MyUser user;

@@ -1,11 +1,13 @@
-package org.example;
+package org.example.Survey;
 
+import org.example.User.Calc;
+import org.example.User.MyUser;
+import org.example.User.Time;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButtonPollType;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
@@ -199,8 +201,6 @@ public class TgBot extends TelegramLongPollingBot {
             int answerCount = Integer.parseInt(messageText);
             if(answerCount >= 1 && answerCount <= tracker.max_answers_for_spec_question()) {
 
-               // users_map.get(chatId).setAnswered(false);
-                // TODO: Inspect
                 tracker.mapAnswerNumberForQuestion(String.valueOf(answerCount));
 
                 tracker.setHandleAnswerNumber(false);
@@ -402,10 +402,26 @@ public class TgBot extends TelegramLongPollingBot {
     private void startSurvey(Long chatId, SurveyTracker tracker) {
         currentSurvey = tracker.toSurvey();
         currentSurvey.setCreator(users_map.get(chatId));
+        sendButtonMessageToAllUsers();
         sendMessageToAllUsers(currentSurvey.toString());
         sendMessageToAllUsers("Write an option for questions !");
         sendMessageToAllUsers("For example question [1] answers [1] You can only answer one time on any question ");
 
+    }
+
+    private void sendButtonMessageToAllUsers() {
+        assert currentSurvey != null;
+        List<SendMessage> messages;
+        for(Long id : users_map.keySet()) {
+            messages = currentSurvey.sendButtonMessage(id);
+            for(SendMessage message : messages) {
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     private void sendMessageToAllUsers(String msg) {
@@ -469,6 +485,8 @@ public class TgBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+
+
 
     @Override
     public String getBotUsername() {

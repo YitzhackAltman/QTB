@@ -1,4 +1,4 @@
-package org.example;
+package org.example.User;
 
 // TODO: maybe run on separate Thread
 public class Time {
