@@ -22,7 +22,7 @@ import java.util.*;
 // TODO: Buttons Yes or No user can input an keyboard handle it
 // TODO: Answer on others question repeat more than one time
 // TODO: Implement a Present for each question
-// TODO: Implement a normal timer time.isFiveMinutesOver() that count 5 min
+// TODO: Implement timer counter 5 min
 
 public class TgBot extends TelegramLongPollingBot {
    // private final List<InlineKeyboardButton> amount_questions_buttons = new ArrayList<>();
@@ -42,7 +42,7 @@ public class TgBot extends TelegramLongPollingBot {
     @Override
     public synchronized void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
-            handleMessage(update);
+        handleMessage(update);
         } else if (update.hasCallbackQuery() && users_map.size() > 0) {
              handleButtonClick(update);
         }
@@ -73,9 +73,7 @@ public class TgBot extends TelegramLongPollingBot {
                     createSurvey(chatId, user, messageText);
                 }else {
                     assert currentSurvey != null;
-                    // TODO: implement the logic for getting the answers from users
-                    llllllllllllllllllllllll(chatId, messageText);
-
+                    sendMessage(chatId, "answer on all questions ");
                 }
                 ////////////////////////////////////////////////////////
 
@@ -87,61 +85,46 @@ public class TgBot extends TelegramLongPollingBot {
             }
         }
 
+
+
     }
 
-    private void llllllllllllllllllllllll(Long chatId, String messageText) {
-        if(currentSurvey.getCreatorName().equals(users_map.get(chatId).getFirstName())) {
+    private void checkSurveyIsCompleted() {
 
-            if(answers == null) {
-                time = new Time();
+        int amountAnsweredUsers = amountOfAnsweredUsers();
+        // TODO: End of Survey
 
-                answers = new SurveyAnswers(currentSurvey);
-                answers.setHandleQuestionNumber(true);
-                // Start the survey with 5 minuts
+        // TODO: Timer
+        if (amountAnsweredUsers >= users_map.size()) {
+            surveyIsCompleted = true;
+            sendMessageToAllUsers("The Survey has been closed! ");
+            sendMessage(currentSurvey.getCreatorChatId(), "Sending the results of survey");
 
-                long startTime = System.currentTimeMillis();
+            // TODO: Total answered users
+            double present = Calc.calculatePresentAnsweredUsers(amountAnsweredUsers, users_map.size());
+            sendMessage(currentSurvey.getCreatorChatId(), "Total users answered " + present + "%");
 
-                Thread t = new Thread(() -> {
-                    while(!surveyIsCompleted || time.isFiveMinutesOver()) {
-                        System.out.print("Time passed: ");
-                        System.out.println(System.currentTimeMillis() - startTime);
-                    }
-                });
-                t.start();
-            }
-            answers.setAnsweringUser(users_map.get(chatId));
-
-            if(!answers.isUserAnsweredOnAllQuestion()) {
-                handleInputFromUserForAnswers(chatId, answers, messageText);
-            }else {
-                sendMessage(chatId, "Wait until time passed or others will answer on all questions");
-            }
-
-            if(answers.isUserAnsweredOnAllQuestion()) {
-                users_map.get(chatId).setAnswered(true);
-            }
-
-            int amountAnsweredUsers = amountOfAnsweredUsers();
-            // TODO: End of Survey
-
-            if (time.isFiveMinutesOver() || amountAnsweredUsers >= users_map.size()) {
-                surveyIsCompleted = true;
-                sendMessageToAllUsers("The Survey has been closed! ");
-                sendMessage(currentSurvey.getCreatorChatId(), "Sending the results of survey");
-
-                // TODO: Total answered users
-                double present = Calc.calculatePresentAnsweredUsers(amountAnsweredUsers, users_map.size());
-                sendMessage(currentSurvey.getCreatorChatId(), "Total users answered " + present + "%");
-
-            }
-
-            if(surveyIsCompleted) {
-                clear();
-            }
-
-        }else {
-            sendMessage(chatId, "You are the creator you can not answer! wait to others ");
         }
+
+
+        if(surveyIsCompleted) {
+            for (Button button : buttons) {
+                sendMessage(currentSurvey.getCreatorChatId(), "QUESTION: " + button.getButtonQuestion());
+                sendMessage(currentSurvey.getCreatorChatId(), button.calculatePresent(users_map.size()).toString());
+            }
+
+            sendMessageToAllUsers("The survey is completed");
+            clear();
+        }
+    }
+
+    private boolean userAnsweredOnAllQuestion() {
+        for (Button button : buttons) {
+            if(!button.isAnsweredOnQuestion()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void clear() {
@@ -168,54 +151,7 @@ public class TgBot extends TelegramLongPollingBot {
         return count;
     }
 
-    private void handleInputFromUserForAnswers(Long chatId, SurveyAnswers answers, String messageText) {
-        if(answers.isHandleQuestionNumber()) {
-            getQuestionNumber(chatId, answers, messageText);
-        }else if(answers.isHandleAnswerNumber()) {
-            getAnswerNumber(chatId, answers, messageText);
-        }else {
-            throw new Error("Unreachable placement ");
-        }
-    }
 
-    private void getQuestionNumber(Long chatId, SurveyAnswers tracker, String messageText) {
-        try {
-            int questionId = Integer.parseInt(messageText);
-            if (questionId >= 1 && questionId <= tracker.max_question_count()) {
-                // TODO: here
-                if(!tracker.isAlreadyAnswered(questionId)) {
-                    tracker.setQuestionId(String.valueOf(questionId));
-                    sendMessage(chatId, "Choose answer for question " + questionId);
-                    tracker.setHandleQuestionNumber(false);
-                    tracker.setHandleAnswerNumber(true);
-                }else { sendMessage(chatId, "You already answered this question choose another !");}
-
-            } else { sendMessage(chatId, "Enter a valid index of question"); }
-
-        }catch (NumberFormatException e) {
-            sendMessage(chatId, "Please enter valid number!");
-        }
-    }
-
-    // TODO: introduce a map that maps question number to answer
-    private void getAnswerNumber(Long chatId, SurveyAnswers tracker, String messageText) {
-        try {
-            int answerCount = Integer.parseInt(messageText);
-            if(answerCount >= 1 && answerCount <= tracker.max_answers_for_spec_question()) {
-
-                tracker.mapAnswerNumberForQuestion(String.valueOf(answerCount));
-
-                tracker.setHandleAnswerNumber(false);
-
-                tracker.setHandleQuestionNumber(true);
-                sendMessage(chatId, "Answer on other questions");
-            }else {
-                sendMessage(chatId, "Enter a valid number of answers! ");
-            }
-        }catch (NumberFormatException e) {
-            sendMessage(chatId, "Please enter a valid number!");
-        }
-    }
 
     private void checkUserJoined(Long chatId, MyUser user) {
         if(!user.isJoined()) {
@@ -232,24 +168,44 @@ public class TgBot extends TelegramLongPollingBot {
     private void handleButtonClick(Update update) {
         String buttonData = update.getCallbackQuery().getData();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
-        // String userName = update.getCallbackQuery().getFrom().getFirstName();
         MyUser user = users_map.get(chatId);
+
+        if(currentSurvey != null && currentSurvey.getCreatorName().equals(users_map.get(chatId).getFirstName())) {
+            if (currentSurvey != null) {
+                for (Button button : buttons) {
+                    button.processButtonClick(buttonData);
+                }
+            }
+        }
 
 
         SurveyTracker tracker = surveyTrackers.get(chatId);
 
-        if(SurveyTracker.isSurveyIsStarted() && currentSurvey != null) {
-            return;
-        }
 
         switch (buttonData) {
             case "start1" -> {
+                if(isStart()) return;
+
                 startSurvey(chatId, tracker);
                 SurveyTracker.setSurveyStart(true);
             }
-            case "timeStart" -> sendMessage(chatId, "How much second hold the Quizz? ");
+            case "timeStart" -> {
+                if(isStart()) return;
+                sendMessage(chatId, "How much second hold the Quizz? ");
+            }
         }
+
+        if(currentSurvey != null) {
+            if(userAnsweredOnAllQuestion()) {
+                users_map.get(chatId).setAnswered(true);
+            }
+        }
+
+        checkSurveyIsCompleted();
+
     }
+
+    private boolean isStart() { return  SurveyTracker.isSurveyIsStarted() && currentSurvey != null; }
 
     private void createSurvey(Long chatId, MyUser user, String message) {
         SurveyTracker tracker = surveyTrackers.get(chatId);
@@ -382,20 +338,17 @@ public class TgBot extends TelegramLongPollingBot {
         buttons = tracker.toButtons();
         currentSurvey.setCreator(users_map.get(chatId));
         sendButtonMessageToAllUsers();
-        sendMessageToAllUsers(currentSurvey.toString());
-        sendMessageToAllUsers("Write an option for questions !");
-        sendMessageToAllUsers("For example question [1] answers [1] You can only answer one time on any question ");
 
     }
 
     private void sendButtonMessageToAllUsers() {
         assert currentSurvey != null;
-        List<SendMessage> messages;
-        for(Long id : users_map.keySet()) {
-            messages = currentSurvey.sendButtonMessage(id);
-            for(SendMessage message : messages) {
+
+        for(Button button : buttons) {
+            for (Long chatId : users_map.keySet()) {
+                SendMessage d = button.sendButtons(chatId);
                 try {
-                    execute(message);
+                    execute(d);
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
@@ -469,10 +422,10 @@ public class TgBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "SOMOMOEOOMEOMO";
+        return "i";
     }
 
     public String getBotToken() {
-        return "ierjowihjrwiou3trh";
+        return "708530412j0";
     }
 }

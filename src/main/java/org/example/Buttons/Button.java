@@ -14,6 +14,8 @@ public class Button {
     private final Map<String, Integer> callbackToClickCount = new HashMap<>();
     private  ButtonData buttonData;
     private final String questionCallback;
+    private final int arr[];
+    private int index;
     private final List<List<InlineKeyboardButton>> buttonsGrid = new ArrayList<>();
     private final List<Question> questions = new ArrayList<>();
 
@@ -22,9 +24,16 @@ public class Button {
     public Button(String question, List<String> options) {
         this.buttonQuestion = question;
         this.options = options;
-        assert options != null;
+        this.arr = new int[options.size()];
+
         SET_BUTTONS();
         questionCallback = answerButtons.get(1).getCallbackData();
+
+        check();
+    }
+
+    public String getButtonQuestion() {
+        return buttonQuestion;
     }
 
 
@@ -38,12 +47,22 @@ public class Button {
         addButton(buttons);
     }
 
+    public void check() {
+        if (options.size() != arr.length && arr.length != answerButtons.size()) throw new AssertionError();
+    }
+
     public InlineKeyboardButton createButton(String text, String callbackData) {
         InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText(text);
         button.setCallbackData(callbackData);
         return button;
     }
+
+//    public int sumAllAnswers() {
+//        for (int i = 0; i < answerButtons.size(); ++i) {
+//            arr[i] = answerButtons.get(i).getNumberOfOption();
+//        }
+//    }
 
     public SendMessage sendButtons(Long chatId) {
         InlineKeyboardMarkup container = new InlineKeyboardMarkup();
@@ -75,11 +94,7 @@ public class Button {
     }
 
 
-
-
-    // public SendMessage sendButtons(Long chatId) {}
-
-    private boolean isAnsweredOnQuestion() {
+    public boolean isAnsweredOnQuestion() {
         assert questionCallback != null;
 
         return callbackToClickCount.get(questionCallback) != null;
@@ -88,16 +103,41 @@ public class Button {
     private void markButtonAsClicked() {
         int currentCount = callbackToClickCount.getOrDefault(questionCallback, 0);
         callbackToClickCount.put(questionCallback, currentCount + 1);
+        arr[index] = currentCount + 1;
+    }
+
+    private boolean isInCallback(String callback) {
+        for (int i = 0; i < answerButtons.size(); ++i) {
+            if(answerButtons.get(i).getCallbackData().equals(callback)) {
+                answerButtons.get(i).setNumberOfOptions(i);
+                index = i;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<String> calculatePresent(int totalUsers) {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < arr.length; i++) {
+            double present = (double) (arr[i] / totalUsers) * 100;
+            result.add(options.get(i) + " " + present + "%\n");
+        }
+        return result;
     }
 
     public void processButtonClick(String callbackData) {
+        if(!isInCallback(callbackData)) return;
+
         if (isAnsweredOnQuestion()) {
             return;
         }
+
         markButtonAsClicked();
 
         // handleButtonData(callbackData);
     }
+
 
 //    public void handleButtonData(String callback) {
 //        switch (buttonData) {

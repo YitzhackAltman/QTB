@@ -11,7 +11,7 @@ import java.util.Random;
 public class AnswerButtons {
     private final String callbackData;
     private static int value = 0;
-
+    private int numberOfOption;
 
     public AnswerButtons(String choice) {
         this.callbackData = choice.charAt(0) + generateCallbackData() +  choice.charAt(choice.length() - 1) + value;
@@ -27,5 +27,12 @@ public class AnswerButtons {
     }
 
 
+    public void setNumberOfOptions(int option) {
+        this.numberOfOption = option;
+    }
+
+    public int getNumberOfOption() {
+        return numberOfOption;
+    }
 
 }
