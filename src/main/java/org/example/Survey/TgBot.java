@@ -1,5 +1,6 @@
 package org.example.Survey;
 
+import org.example.Buttons.Button;
 import org.example.User.Calc;
 import org.example.User.MyUser;
 import org.example.User.Time;
@@ -26,6 +27,7 @@ import java.util.*;
 public class TgBot extends TelegramLongPollingBot {
    // private final List<InlineKeyboardButton> amount_questions_buttons = new ArrayList<>();
    // private final List<InlineKeyboardButton> amount_answers_buttons = new ArrayList<>();
+    private List<Button> buttons;
     private final Map<Long, MyUser> users_map = new HashMap<>();
     private Survey currentSurvey = null;
     private final Map<Long, SurveyTracker> surveyTrackers = new HashMap<>();
@@ -232,7 +234,7 @@ public class TgBot extends TelegramLongPollingBot {
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
         // String userName = update.getCallbackQuery().getFrom().getFirstName();
         MyUser user = users_map.get(chatId);
-        //user.setLastButtonClicked(buttonData);
+
 
         SurveyTracker tracker = surveyTrackers.get(chatId);
 
@@ -240,37 +242,13 @@ public class TgBot extends TelegramLongPollingBot {
             return;
         }
 
-
-        int numOfQuestions = 0;
-        int numOfAnswers = 0;
         switch (buttonData) {
-            case "qBtn1": // handel question buttons
-                numOfQuestions = 1; break;
-            case "qBtn2":
-                numOfQuestions = 2; break;
-            case "qBtn3":
-                numOfQuestions = 3; break;
-            case "aBtn1": // handling answers buttons
-                numOfAnswers = 2; break;
-            case "aBtn2":
-                numOfAnswers = 3; break;
-            case "aBtn3":
-                numOfAnswers = 4; break;
-            case "start1":
+            case "start1" -> {
                 startSurvey(chatId, tracker);
-                SurveyTracker.setSurveyStart(true); break;
-            case "timeStart":
-                sendMessage(chatId, "How much second hold the Quizz? "); break;
+                SurveyTracker.setSurveyStart(true);
+            }
+            case "timeStart" -> sendMessage(chatId, "How much second hold the Quizz? ");
         }
-
-//        if(numOfQuestions > 0 && user.getCountQuestionButtonsClicked() < 3) {
-//           // tracker.setNumberOfQuestions(numOfQuestions);
-//        }
-//
-//        if(numOfAnswers > 1 && user.getCountAnswersButtonsClicked() < 3) {
-//            //tracker.setAnswerCountForCurrentQuestion(numOfAnswers);
-//        }
-
     }
 
     private void createSurvey(Long chatId, MyUser user, String message) {
@@ -401,6 +379,7 @@ public class TgBot extends TelegramLongPollingBot {
 
     private void startSurvey(Long chatId, SurveyTracker tracker) {
         currentSurvey = tracker.toSurvey();
+        buttons = tracker.toButtons();
         currentSurvey.setCreator(users_map.get(chatId));
         sendButtonMessageToAllUsers();
         sendMessageToAllUsers(currentSurvey.toString());
@@ -490,10 +469,10 @@ public class TgBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "tom";
+        return "SOMOMOEOOMEOMO";
     }
 
     public String getBotToken() {
-        return "6858446471:AAHtJemmvpN77g0iZie2dEs_lW-Dxk_R7TY";
+        return "ierjowihjrwiou3trh";
     }
 }

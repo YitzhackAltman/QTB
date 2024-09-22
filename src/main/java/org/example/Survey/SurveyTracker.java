@@ -1,10 +1,13 @@
 package org.example.Survey;
 
+import org.example.Buttons.Button;
 import org.example.User.MyUser;
 import org.example.User.Question;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class SurveyTracker {
     private final Long chatId;
@@ -49,6 +52,14 @@ public class SurveyTracker {
         survey.setQuestions(new ArrayList<>(questions));
         survey.setCreator(creator);
         return survey;
+    }
+
+    public List<Button> toButtons() {
+        List<Button> buttons = new ArrayList<>();
+        for(Question question : questions) {
+            buttons.add(new Button(question.getQuestion(), question.getOptions()));
+        }
+        return buttons;
     }
 
     public Long getChatId() {
