@@ -15,14 +15,7 @@ import java.util.*;
 
 
 // TODO LIST:
-// TODO UserQuestion as buttons
-// TODO More flexible
-// TODO Add ButtonData
-// TODO Remove code repeat
-// TODO: Buttons Yes or No user can input an keyboard handle it
-// TODO: Answer on others question repeat more than one time
-// TODO: Implement a Present for each question
-// TODO: Implement timer counter 5 min
+// TODO: Implement timer counter 5 min -
 
 public class TgBot extends TelegramLongPollingBot {
    // private final List<InlineKeyboardButton> amount_questions_buttons = new ArrayList<>();
@@ -422,10 +415,10 @@ public class TgBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "i";
+        return "???????";
     }
 
     public String getBotToken() {
-        return "708530412j0";
+        return "???????";
     }
 }
